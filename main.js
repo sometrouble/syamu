@@ -1,9 +1,10 @@
-  enchant();
+enchant();
 
 window.onload = function() {
 	var game = new Core(320,480); 
+
+	//////////////////////////////////////////////////
 	//GameInit
-	
 	//////////////////////////////////////////////////
 	//Image
 	game.preload('assets/syamu.png');
@@ -35,9 +36,12 @@ window.onload = function() {
 		
 	var start = new Scene();
 	var end = new Scene();
-
+	//////////////////////////////////////////////////
 	//Set BGM
 	var bgm = game.assets['assets/tropicalnojob.mp3'];
+	//////////////////////////////////////////////////
+
+
 
 	/*function sleep(){
 		var sleeptime = Math.floor(game.frame/game.fps);
@@ -52,6 +56,9 @@ window.onload = function() {
 		}
 	}*/
 
+
+
+	//////////////////////////////////////////////////
 	//taima
 	function taima(){
 		
@@ -67,9 +74,8 @@ window.onload = function() {
 		var nowtime = 1;
 		game.pushScene(end);
 		bgm.stop();
-		
 
-		///////////////////////////////////////////////////
+		//taimajudge		
 		game.addEventListener('enterframe',function() {
 
 			if(game.frame % game.fps == 0){
@@ -101,10 +107,20 @@ window.onload = function() {
 						break;
 				}
 			}
+
+			//Tweet button
+			if(game.input.b){
+				tweet();
+			}
 		})
 
 	}
-		
+
+	//////////////////////////////////////////////////
+	
+
+
+	//////////////////////////////////////////////////
 	//StartMessage
 	start.backgroundColor = "#FF9999";
 	var startMsg = new Label("Syamu Shooting");
@@ -119,40 +135,97 @@ window.onload = function() {
 	setsumeiMsg.font = "normal normal 16px/1.0 monospace";
 	setsumeiMsg.color = "#FFFFFF";
 	start.addChild(setsumeiMsg);
-	var versionMsg = new Label("ver. 0.0");
+	var versionMsg = new Label("ver. 0.00");
 	versionMsg.x = 250;
 	versionMsg.y = 440;
 	versionMsg.font = "normal normal 12px/1.0 monospace";
 	versionMsg.color = "#FFFFFF";
 	start.addChild(versionMsg);
-	
-	
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//EndMessage
 	var endMsg = new Label("GameOver");
 	var endScore = new Label("SCORE: "+game.score);
 	var endReMsg = new Label("Press F5 Key");
-	endMsg.x = 100;
-	endMsg.y = 200;
-	endMsg.font = "normal normal 32px/1.0 monospace";
+	endMsg.x = 80;
+	endMsg.y = 180;
+	endMsg.font = "normal normal 42px/1.0 monospace";
 	endMsg.color = "#FFFFFF";
 	end.addChild(endMsg);
-	endScore.x = 130;
+	endScore.x = 115;
 	endScore.y = 240;
 	endScore.font = "normal normal 16px/1.0 monospace";
 	endScore.color = "#FFFFFF";
 	end.addChild(endScore);
-	endReMsg.x = 130;
+	endReMsg.x = 120;
 	endReMsg.y = 280;
 	endReMsg.font = "normal normal 12px/1.0 monospace";
 	endReMsg.color = "#FFFFFF";
 	end.addChild(endReMsg);
+	//////////////////////////////////////////////////
+
+
 	
+	//////////////////////////////////////////////////
+	//Tweet Label	
+	var tweet_label = new Label("white");
+	tweet_label.y = 360;
+	tweet_label.x = 100;
+	tweet_label.font = "normal normal 12px/1.0 monospace";
+	tweet_label.color = "#FFFFFF";
+	tweet_label.text = "Press T key to Tweet";
+	tweet_label._style.zIndex = 8;
+	function tweet(){
+		//alert
+		tweetyn = confirm("スコアをツイートしますか？");
+		if(tweetyn == true){
+			//Event touch
+			//tweet_label.addEventListener('touchend', function(){
+				console.log("a");
+				var EUC = encodeURIComponent;
+				var twitter_url = "http://twitter.com/?status=";
+				var message = "あなたのスコアは" + game.score + "です。\nhttp://sometrouble.net\n#syamu_shooting";
+				//Twitter
+				location.href = twitter_url+ EUC(message);
+				game.input.b = false;
+			//});
+		}else{
+			alert("俺でオナニーはしたらダメだで")
+			game.input.b = false;
+		}
+	}
+	end.addChild(tweet_label);
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
+	//CenterLabel
+	/*
+	var CenterLabel = Class.create(Label, {
+	initialize : function(color){
+		Label.call(this);
+		this.width = 320;
+		this._element.style.textAlign = "center";
+		color = color || "white";
+		this.color = color;
+		}
+	});
+	*/
+	//////////////////////////////////////////////////
 	
+
+
+	//////////////////////////////////////////////////
 	//GameStart
 	game.onload = function() {
 		
 		game.keybind(' '.charCodeAt(0), 's');
 		game.keybind(90, 'a');
+		game.keybind(84, 'b');
 		
 		//Set BGM
 		var bgm = game.assets['assets/tropicalnojob.mp3'];
@@ -178,7 +251,8 @@ window.onload = function() {
 			}
 		});
 		
-		//Player
+		//////////////////////////////////////////////////
+		//init Player
 		Syamu = new Syamu(140, 440);
 		
 		score = new Label(0);
@@ -220,9 +294,13 @@ window.onload = function() {
 			endScore.text = "SCORE: "+game.score;
 			game.rootScene.addChild(score);
 		});
+		//////////////////////////////////////////////////
 	}
 	game.start(); // StartGame
 	
+
+
+	//////////////////////////////////////////////////
 	//Player
 	var Syamu = Class.create(Sprite, {
 		initialize: function(x, y){
@@ -253,7 +331,11 @@ window.onload = function() {
 			
 		}
 	});
+	//////////////////////////////////////////////////
 
+
+
+	//////////////////////////////////////////////////
 	//enemy
 	var Enemy = enchant.Class.create(enchant.Sprite, {
 		initialize: function(x, y){
@@ -280,7 +362,11 @@ window.onload = function() {
 			delete enemies[this.key]; delete this;
 		}
 	});
-	
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//enemyR
 	var EnemyR = enchant.Class.create(enchant.Sprite, {
 		initialize: function(x, y){
@@ -310,7 +396,11 @@ window.onload = function() {
 			delete enemiesR[this.key]; delete this;
 		}
 	});
-	
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//enemyB
 	var EnemyB = enchant.Class.create(enchant.Sprite, {
 		initialize: function(x, y){
@@ -354,7 +444,11 @@ window.onload = function() {
 			delete enemiesB[this.key]; delete this;
 		}
 	});
-	
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//bullet
 	var Bullet = enchant.Class.create(enchant.Sprite, {
 		initialize: function(x, y, direction){
@@ -372,7 +466,11 @@ window.onload = function() {
 		},
 		remove: function(){ game.rootScene.removeChild(this); delete this; }
 	});
-	
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//player bullet
 	var PlayerBullet = enchant.Class.create(Bullet, {
 		initialize: function(x, y){
@@ -401,5 +499,6 @@ window.onload = function() {
 			});
 		}
 	});
+	//////////////////////////////////////////////////
 	
 }
