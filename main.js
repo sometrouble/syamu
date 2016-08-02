@@ -12,12 +12,20 @@ window.onload = function() {
 	game.preload('assets/musyokuorig.png');
 	game.preload('assets/musyokured.png');
 	game.preload('assets/musyokublue.png');
+	game.preload('assets/musyokugreen.png');
+	game.preload('assets/item1.png');
+	game.preload('assets/item2.png');
+	/*
+	game.preload('assets/BG1.png');
+	game.preload('assets/BG2.png');
+	*/
 	//////////////////////////////////////////////////
 	//Sound
 	game.preload('assets/tropicalnojob.mp3');
 	game.preload('assets/taima.mp3');
 	game.preload('assets/taimasp.mp3');
 	game.preload('assets/taimasp2.mp3');
+	game.preload('assets/wisu.mp3');
 	//////////////////////////////////////////////////
 	//Game Settings
 	game.fps = 30;
@@ -28,6 +36,7 @@ window.onload = function() {
 	var SPEED = 3;
 	var MOVE_RANGE_X = game.width - 32;
 	var MOVE_RANGE_Y = game.height - 32;
+	var BULLET_INTERVAL = 12;
 	
 	var left = 0;
 	var right = MOVE_RANGE_X;
@@ -36,6 +45,13 @@ window.onload = function() {
 		
 	var start = new Scene();
 	var end = new Scene();
+
+	var joblevel = 0;
+
+	/*BackGround Scroll
+	var BG_HEIGHT = 480;
+	var SCROLL_SPEED = 5;
+	*/
 	//////////////////////////////////////////////////
 	//Set BGM
 	var bgm = game.assets['assets/tropicalnojob.mp3'];
@@ -112,12 +128,34 @@ window.onload = function() {
 			if(game.input.b){
 				tweet();
 			}
+			//restart
+			if(game.input.e){
+				location.reload();
+				game.input.e = false;	
+			}
 		})
 
 	}
 
 	//////////////////////////////////////////////////
 	
+
+
+	//////////////////////////////////////////////////
+	//wisu
+	function wisu(){
+		var wisuvoice = game.assets['assets/wisu.mp3'];
+
+		wisuvoice.play();
+
+		if (joblevel >= 2){
+			game.score += 1000;
+		}else{
+			joblevel++;
+		}
+	}
+	//////////////////////////////////////////////////
+
 
 
 	//////////////////////////////////////////////////
@@ -135,7 +173,7 @@ window.onload = function() {
 	setsumeiMsg.font = "normal normal 16px/1.0 monospace";
 	setsumeiMsg.color = "#FFFFFF";
 	start.addChild(setsumeiMsg);
-	var versionMsg = new Label("ver. 0.00");
+	var versionMsg = new Label("ver. 0.0000");
 	versionMsg.x = 250;
 	versionMsg.y = 440;
 	versionMsg.font = "normal normal 12px/1.0 monospace";
@@ -149,7 +187,7 @@ window.onload = function() {
 	//EndMessage
 	var endMsg = new Label("GameOver");
 	var endScore = new Label("SCORE: "+game.score);
-	var endReMsg = new Label("Press F5 Key");
+	var endReMsg = new Label("Press ESC key to restart");
 	endMsg.x = 80;
 	endMsg.y = 180;
 	endMsg.font = "normal normal 42px/1.0 monospace";
@@ -160,7 +198,7 @@ window.onload = function() {
 	endScore.font = "normal normal 16px/1.0 monospace";
 	endScore.color = "#FFFFFF";
 	end.addChild(endScore);
-	endReMsg.x = 120;
+	endReMsg.x = 100;
 	endReMsg.y = 280;
 	endReMsg.font = "normal normal 12px/1.0 monospace";
 	endReMsg.color = "#FFFFFF";
@@ -187,9 +225,10 @@ window.onload = function() {
 				console.log("a");
 				var EUC = encodeURIComponent;
 				var twitter_url = "http://twitter.com/?status=";
-				var message = "あなたのスコアは" + game.score + "です。\nhttp://sometrouble.net\n#syamu_shooting";
+				var message = "あなたのスコアは" + game.score + "です。\nsometrouble.net\n#syamu_shooting";
 				//Twitter
 				location.href = twitter_url+ EUC(message);
+				//window.open(twitter_url + EUC(message), "_blank","top=50,left=50,width=500,height=500,scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1");
 				game.input.b = false;
 			//});
 		}else{
@@ -200,6 +239,33 @@ window.onload = function() {
 	end.addChild(tweet_label);
 	//////////////////////////////////////////////////
 
+
+
+	//////////////////////////////////////////////////
+	//operation
+	var operation = new Label("Press Arrow keys to move Syamu")
+	operation.x = 68;
+	operation.y = 300;
+	operation.font = "normal normal 12px/1.0 monospace";
+	operation.color = "#FFFFFF";
+	start.addChild(operation);
+	//////////////////////////////////////////////////
+
+
+	//////////////////////////////////////////////////
+	//restart
+	/*
+	function restart(core) {
+		core.replaceScene(createGameScene());
+	}
+
+	//create
+	function createGameScene(){
+		var scene = new Scene();
+		return scene;
+	}
+	*/
+	//////////////////////////////////////////////////
 
 
 	//////////////////////////////////////////////////
@@ -223,9 +289,11 @@ window.onload = function() {
 	//GameStart
 	game.onload = function() {
 		
-		game.keybind(' '.charCodeAt(0), 's');
-		game.keybind(90, 'a');
-		game.keybind(84, 'b');
+		//keybind
+		game.keybind(' '.charCodeAt(0), 's');	//space key
+		game.keybind(27, 'e');					//esc key
+		game.keybind(90, 'a');					//z key
+		game.keybind(84, 'b');					//t key
 		
 		//Set BGM
 		var bgm = game.assets['assets/tropicalnojob.mp3'];
@@ -244,13 +312,31 @@ window.onload = function() {
 			//press space key(s)
 			if(game.input.s){
 				game.popScene(start);
+				bgm.play();
 								
 				enemies = [];
 				enemiesR = [];
 				enemiesB = [];
+				enemiesG = [];
+
+				items1 = [];
 			}
 		});
 		
+		//////////////////////////////////////////////////
+		/*BackGround scroll
+		var BG1 = new Sprite(320, 480);
+		BG1.image = game.assets['assets/BG1.png'];
+		BG1.x = 0;
+		BG1.y = 0;
+		game.rootScene.addChild(BG1);
+
+		var BG2 = new Sprite(320, 480);
+		BG1.image = game.assets['assets/BG2.png'];
+		BG2.x = 0;
+		BG2.y = 480;
+		game.rootScene.addChild(BG2);
+		*/
 		//////////////////////////////////////////////////
 		//init Player
 		Syamu = new Syamu(140, 440);
@@ -260,7 +346,6 @@ window.onload = function() {
 		score.font = "normal normal 15px/1.0 monospace";
 		
 		//BGM
-		bgm.play();
 		bgm.loop = true;
 		
 		//loop
@@ -283,16 +368,46 @@ window.onload = function() {
 			}
 			
 			//blue
-			if(game.frame % 30 == 0){
+			if(game.frame % 25 == 0){
 				var x = Math.random()*(320-32);
 				var enemyb = new EnemyB(x, 10);
 				enemyb.key = game.frame;
 				enemiesB[game.frame] = enemyb;
 			}
 
+			//green
+			if(game.frame % 30 == 0){
+				var x = Math.random()*(320-32);
+				var enemyg = new EnemyG(x, 10);
+				enemyg.key = game.frame;
+				enemiesG[game.frame] = enemyg;
+			}
+
+			//item1
+			if(game.frame % 240 == 0){
+				var x = Math.random()*(320-32);
+				var item1 = new Item1(x, 10);
+				item1.key = game.frame;
+				items1[game.frame] = item1;
+			}
+
 			score.text = "SCORE: "+game.score;
 			endScore.text = "SCORE: "+game.score;
 			game.rootScene.addChild(score);
+
+			/*Scroll
+			BG1.y -= SCROLL_SPEED;
+			BG2.y -= SCROLL_SPEED;
+
+			if (BG1.y >= 480){
+				BG1.y = 0;
+			}
+
+			if (BG2.y >= 480){
+				BG2.y = 0;
+			}
+
+			*/
 		});
 		//////////////////////////////////////////////////
 	}
@@ -318,7 +433,7 @@ window.onload = function() {
 			if (game.input.left) { this.x -= SPEED;}
 			
 			//shoot
-			if(/*game.input.s && */game.frame % 12 == 0) {
+			if(/*game.input.s && */game.frame % BULLET_INTERVAL == 0) {
 				var s = new PlayerBullet(this.x, this.y); 
 			}
 			
@@ -449,6 +564,91 @@ window.onload = function() {
 
 
 	//////////////////////////////////////////////////
+	//enemyG
+	var EnemyG = enchant.Class.create(enchant.Sprite, {
+		initialize: function(x, y){
+		
+			Sprite.call(this, 32, 32);
+			this.image = game.assets['assets/musyokugreen.png'];
+			this.x = x;
+			this.y = y;
+
+			var jx = 0;
+			var jy = 0;
+
+			var vx = 0;
+			var vy = 0;
+			var tv = 0.2;
+			//move
+			this.move = function(){
+
+				jx = Syamu.x;
+				jy = Syamu.y;
+
+				if (jx > this.x) {
+					vx += tv;
+				if (vx > 8) vx = 8;
+				} else if (jx < this.x) {
+					vx -= tv;
+				if (vx < -8) vx = -8;
+				}
+				if (jy > this.y) {
+					vy += tv;
+				if (vy > 8) vy = 8;
+					} else if (jy < this.y) {
+				vy -= tv;
+					if (vy < -8) vy = -8;
+				}
+				this.x += vx;
+				this.y += vy;
+			};
+			this.addEventListener('enterframe', function(){
+				this.move();
+				if(Syamu.within(this, 16)){ taima(); }
+			});
+			game.rootScene.addChild(this);
+		},
+		remove: function(){
+			game.rootScene.removeChild(this);
+			delete enemies[this.key]; delete this;
+		}
+	});
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
+	//Item
+	var Item1 = enchant.Class.create(enchant.Sprite, {
+		initialize: function(x, y){
+		
+			Sprite.call(this, 24, 24);
+			this.image = game.assets['assets/item1.png'];
+			this.x = x;
+			this.y = y;
+			//move
+			this.move = function(){
+				this.y += 5;
+			};
+			this.addEventListener('enterframe', function(){
+				this.move();
+				if(this.y > 480 || this.x > 320 || this.x < -this.width || this.y < -this.height){
+					this.remove();
+				}
+				if(Syamu.within(this, 16)){ this.remove(); wisu(); }
+			});
+			game.rootScene.addChild(this);
+		},
+		remove: function(){
+			game.rootScene.removeChild(this);
+			delete items1[this.key]; delete this;
+		}
+	});
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//bullet
 	var Bullet = enchant.Class.create(enchant.Sprite, {
 		initialize: function(x, y, direction){
@@ -457,10 +657,32 @@ window.onload = function() {
 			this.x = x;
 			this.y = y;
 			this.addEventListener('enterframe', function(){
-				this.y -= 5;
+
+				//joblevel switch
+				switch(joblevel){
+					case 0:
+						this.y -= 5;
+						BULLET_INTERVAL = 12;
+						SPEED = 3;
+						break;
+
+					case 1:
+						this.y -= 5;
+						BULLET_INTERVAL = 10;
+						SPEED = 4;
+						break;
+
+					case 2:
+						this.y -= 5;
+						BULLET_INTERVAL = 8;
+						SPEED = 5;
+						break;
+				}
+
 				if(this.y > 480 || this.x > 320 || this.x < -this.width || this.y < -this.height){
 					this.remove();
 				}
+				
 			});
 			game.rootScene.addChild(this);
 		},
@@ -495,6 +717,12 @@ window.onload = function() {
 					}
 				}
 				*/
+
+				for(var i in enemiesG){
+					if(enemiesG[i].intersect(this)){
+						this.remove(); enemiesG[i].remove(); game.score += 500;
+					}
+				}
 				
 			});
 		}
