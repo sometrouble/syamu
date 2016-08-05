@@ -3,6 +3,20 @@ enchant();
 window.onload = function() {
 	var game = new Core(320,480); 
 
+
+	//////////////////////////////////////////////////
+	//----------------------------------------------//
+	//未修正のバグ										//
+	//----------------------------------------------//
+	//スコアによってシャム増加値を変える
+	//
+	//
+	//
+	//
+	//
+	//----------------------------------------------//
+	//////////////////////////////////////////////////
+
 	//////////////////////////////////////////////////
 	//GameInit
 	//////////////////////////////////////////////////
@@ -26,6 +40,7 @@ window.onload = function() {
 	game.preload('assets/taimasp.mp3');
 	game.preload('assets/taimasp2.mp3');
 	game.preload('assets/wisu.mp3');
+	game.preload('assets/damage.mp3');
 	//////////////////////////////////////////////////
 	//Game Settings
 	game.fps = 30;
@@ -46,7 +61,9 @@ window.onload = function() {
 	var start = new Scene();
 	var end = new Scene();
 
-	var joblevel = 0;
+	var joblevel = 1;
+	var adcounter= 0;
+	var damageless = 0; 
 
 	/*BackGround Scroll
 	var BG_HEIGHT = 480;
@@ -128,15 +145,14 @@ window.onload = function() {
 			if(game.input.b){
 				tweet();
 			}
+
 			//restart
 			if(game.input.e){
 				location.reload();
 				game.input.e = false;	
 			}
 		})
-
 	}
-
 	//////////////////////////////////////////////////
 	
 
@@ -159,6 +175,36 @@ window.onload = function() {
 
 
 	//////////////////////////////////////////////////
+	//syamuHP
+	function syamuDamage(){
+		var damagevoice = game.assets['assets/damage.mp3'];
+
+		if (damageless == 0){
+
+			if (joblevel == 0){
+				taima();
+			} else {
+
+				joblevel--;
+				damagevoice.play();
+
+				//Syamu.opacity = 0.5;
+
+				damageless = 1;
+				setTimeout(damagelessF, 2000);
+			}
+		}
+	}
+	//////////////////////////////////////////////////
+	function damagelessF(){
+		damageless = 0;
+		Syamu.opacity = 1;
+	}
+	//////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////
 	//StartMessage
 	start.backgroundColor = "#FF9999";
 	var startMsg = new Label("Syamu Shooting");
@@ -173,8 +219,8 @@ window.onload = function() {
 	setsumeiMsg.font = "normal normal 16px/1.0 monospace";
 	setsumeiMsg.color = "#FFFFFF";
 	start.addChild(setsumeiMsg);
-	var versionMsg = new Label("ver. 0.0000");
-	versionMsg.x = 250;
+	var versionMsg = new Label("ver. 0.00000");
+	versionMsg.x = 200;
 	versionMsg.y = 440;
 	versionMsg.font = "normal normal 12px/1.0 monospace";
 	versionMsg.color = "#FFFFFF";
@@ -345,6 +391,11 @@ window.onload = function() {
 		score.color = "#000000";
 		score.font = "normal normal 15px/1.0 monospace";
 		
+		syamuHP = new Label(0);
+		syamuHP.x = 250;
+		syamuHP.color = "#000000";
+		syamuHP.font = "normal normal 15px/1.0 monospace";
+
 		//BGM
 		bgm.loop = true;
 		
@@ -352,7 +403,7 @@ window.onload = function() {
 		game.rootScene.addEventListener('enterframe', function(){
 			
 			//orig
-			if(game.frame % 10 == 0){
+			if(game.frame % 20 == 0){
 				var x = Math.random()*(320-32);
 				var enemy = new Enemy(x, 10);
 				enemy.key = game.frame;
@@ -360,7 +411,7 @@ window.onload = function() {
 			}
 			
 			//red
-			if(game.frame % 15 == 0){
+			if(game.frame % 25 == 0){
 				var x = Math.random()*(320-32);
 				var enemyr = new EnemyR(x, 10);
 				enemyr.key = game.frame;
@@ -368,7 +419,7 @@ window.onload = function() {
 			}
 			
 			//blue
-			if(game.frame % 25 == 0){
+			if(game.frame % 40 == 0){
 				var x = Math.random()*(320-32);
 				var enemyb = new EnemyB(x, 10);
 				enemyb.key = game.frame;
@@ -391,9 +442,41 @@ window.onload = function() {
 				items1[game.frame] = item1;
 			}
 
+			if(adcounter = 0 && game.score > 10000){
+				adcounter++; 
+			}else if(adcounter = 2 && game.score > 50000){
+				adcounter++;
+			}else if(adcounter = 4 && game.score > 100000){
+				addcounter++;
+			}
+
+			switch(adcounter){
+				case 1:
+					adcounter++;
+					wisu();
+					break;
+
+				case 3:
+					adcounter++;
+					wisu();
+					break;
+
+				case 5:
+					adcounter++;
+					wisu();
+					break;
+			}
+
+			if(damageless == 1){
+				Syamu.opacity = (game.frame % 12 == 0) ? 0.2 : 0.6;
+			}
+
 			score.text = "SCORE: "+game.score;
 			endScore.text = "SCORE: "+game.score;
 			game.rootScene.addChild(score);
+
+			syamuHP.text = "SYAMU: "+ joblevel;
+			game.rootScene.addChild(syamuHP);
 
 			/*Scroll
 			BG1.y -= SCROLL_SPEED;
@@ -468,7 +551,7 @@ window.onload = function() {
 				if(this.y > 480 || this.x > 320 || this.x < -this.width || this.y < -this.height){
 					this.remove();
 				}
-				if(Syamu.within(this, 16)){ taima(); }
+				if(Syamu.within(this, 16)){ syamuDamage(); }
 			});
 			game.rootScene.addChild(this);
 		},
@@ -502,7 +585,7 @@ window.onload = function() {
 				if(this.y > 480 || this.x > 320 || this.x < -this.width || this.y < -this.height){
 					this.remove();
 				}
-				if(Syamu.within(this, 16)){ taima(); }
+				if(Syamu.within(this, 16)){ syamuDamage(); }
 			});
 			game.rootScene.addChild(this);
 		},
@@ -550,7 +633,7 @@ window.onload = function() {
 				if(this.y > 480 || this.x > 320 || this.x < -this.width || this.y < -this.height){
 					this.remove();
 				}
-				if(Syamu.within(this, 16)){ taima(); }
+				if(Syamu.within(this, 16)){ syamuDamage(); }
 			});
 			game.rootScene.addChild(this);
 		},
@@ -604,7 +687,7 @@ window.onload = function() {
 			};
 			this.addEventListener('enterframe', function(){
 				this.move();
-				if(Syamu.within(this, 16)){ taima(); }
+				if(Syamu.within(this, 16)){ syamuDamage(); }
 			});
 			game.rootScene.addChild(this);
 		},
@@ -679,7 +762,7 @@ window.onload = function() {
 						break;
 				}
 
-				if(this.y > 480 || this.x > 320 || this.x < -this.width || this.y < -this.height){
+				if(this.y > 480/* || this.x > 320 || this.x < -this.width || this.y < -this.height*/){
 					this.remove();
 				}
 				
